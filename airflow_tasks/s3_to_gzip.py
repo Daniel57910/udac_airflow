@@ -18,4 +18,10 @@ def s3_to_gzip(data_type):
 
   dataframe = data_loader.create_dataframe_from_files()
 
-  logger.info(dataframe.head(100))  
+  dataframe.to_csv(
+    f'/Users/danielwork/Documents/GitHub/udac_airflow/data/{data_type}.gz',
+    header=True,
+    index=False,
+    compression='gzip'
+  )
+
