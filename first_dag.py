@@ -7,12 +7,17 @@ from airflow import DAG
 from datetime import datetime
 from airflow_tasks.s3_to_gzip import s3_to_gzip
 import os
+import logging
 import configparser
 
 def s3_to_redshift():
+  logger = logging.getLogger(__name__)
   pg_hook = PostgresHook('redshift_lake')
-  test_query = '''select * from pg_table_def'''
-  pg_hook.run(test_query)
+  test_query = '''select * from test'''
+  res = pg_hook.get_records(test_query)
+
+  for r in res:
+    logger.info('RESULT => {}'.format(r))
 
 
 PROJECT_PATH='/Users/danielwork/Documents/GitHub/udac_airflow'
