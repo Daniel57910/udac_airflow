@@ -6,19 +6,27 @@ import logging
 from airflow import DAG
 from datetime import datetime
 from airflow_tasks.s3_to_gzip import s3_to_gzip
+from sql.create_tables import table_commands
 import os
 import logging
 import configparser
+import re
 
-def s3_to_redshift():
+IAM_ROLE = 'arn:aws:iam::774141665752:role/redshift_s3_role'
+
+def destroy_and_create_schema():
   logger = logging.getLogger(__name__)
   pg_hook = PostgresHook('redshift_lake')
-  test_query = '''select * from test'''
-  res = pg_hook.get_records(test_query)
 
-  for r in res:
-    logger.info('RESULT => {}'.format(r))
+  for command in table_commands:
+    pg_hook.run(command)  
 
+def s3_to_redshift(table_name, data, IAM_ROLE):
+  logger = logging.getLogger(__name__)
+  pg_hook = PostgresHook('redshift_lake')
+  copy_query = "COPY {} FROM 's3://sparkify-airflow-data-2/{}' iam_role '{}' region 'eu-west-2' gzip delimiter ',';".format(table_name, data, IAM_ROLE)
+
+  pg_hook.run(copy_query)
 
 PROJECT_PATH='/Users/danielwork/Documents/GitHub/udac_airflow'
 default_args = {
@@ -49,19 +57,24 @@ log_staging_sync = PythonOperator(
 
 sync_staging_directory_to_s3 = BashOperator(
   task_id='sync_staging_directory_to_s3',
-  bash_command=f'aws s3 sync {PROJECT_PATH}/data s3://sparkify-airflow-data/',
+  bash_command=f'aws s3 sync {PROJECT_PATH}/data s3://sparkify-airflow-data-2/',
   dag=dag
 )
 
-create_song_staging_table = PythonOperator(
-  task_id='create_song_staging_table',
-  dag=redshift_hook_dag,
-  python_callable=s3_to_redshift
+populate_song_staging_table = PythonOperator(
+  task_id='populate_song_staging_table',
+  dag=dag,
+  python_callable=s3_to_redshift,
+  op_kwargs = {'table_name': 'song_staging', 'data': 'song_data.gz', 'IAM_ROLE': IAM_ROLE}
 )
 
+create_schema = PythonOperator(
+  task_id='create_schema',
+  dag=dag,
+  python_callable=destroy_and_create_schema
+)
 
-# song_staging_sync >> sync_staging_directory_to_s3
-# log_staging_sync >> sync_staging_directory_to_s3
-# sync_staging_directory_to_s3 >> create_song_staging_table
-
-create_song_staging_table
+song_staging_sync >> sync_staging_directory_to_s3
+log_staging_sync >> sync_staging_directory_to_s3
+sync_staging_directory_to_s3 >> populate_song_staging_table
+create_schema >> populate_song_staging_table

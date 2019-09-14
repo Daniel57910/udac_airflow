@@ -5,6 +5,38 @@ from lib.file_finder import FileFinder
 from lib.data_loader import DataLoader
 import pandas as pd
 import logging
+import re
+
+SONG_STAGING_COLUMNS = [
+'artist_id' ,
+'artist_latitude' ,
+'artist_location' ,
+'artist_longitude' ,
+'artist_name' ,
+'duration' ,
+'num_songs' ,
+'song_id' ,
+'title' ,
+'year'
+]
+
+def clean_dataframe_of_non_alphanumeric_characters(dataframe, columns):
+  '''
+  cleans dataframe columns of non alphanumeric or whitespace to ensure they can be entered into DB
+  '''
+  for col in columns:
+    dataframe[col] = dataframe[col].apply(remove_dangerous_characters)
+
+def remove_dangerous_characters(entry):
+  '''
+  regex that returns all alphanumeric and whitespace characters from a string
+  '''
+  regex = r'([^\s\w\d.]+)'
+  entry =  re.sub(regex, '', str(entry))
+  if entry == 'nan':
+    return None
+  
+  return entry
 
 def s3_to_gzip(data_type):
   logger = logging.getLogger(__name__)
@@ -18,10 +50,20 @@ def s3_to_gzip(data_type):
 
   dataframe = data_loader.create_dataframe_from_files()
 
+  if data_type == 'song_data':
+    clean_dataframe_of_non_alphanumeric_characters(dataframe, SONG_STAGING_COLUMNS)
+
+  logger.info(dataframe.head(100))
+
   dataframe.to_csv(
     f'/Users/danielwork/Documents/GitHub/udac_airflow/data/{data_type}.gz',
-    header=True,
+    header=False,
     index=False,
     compression='gzip'
   )
 
+  dataframe.to_csv(
+    f'/Users/danielwork/Documents/GitHub/udac_airflow/data/{data_type}.csv',
+    header=False,
+    index=False
+  )
