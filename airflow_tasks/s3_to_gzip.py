@@ -7,19 +7,6 @@ import pandas as pd
 import logging
 import re
 
-SONG_STAGING_COLUMNS = [
-'artist_id' ,
-'artist_latitude' ,
-'artist_location' ,
-'artist_longitude' ,
-'artist_name' ,
-'duration' ,
-'num_songs' ,
-'song_id' ,
-'title' ,
-'year'
-]
-
 def clean_dataframe_of_non_alphanumeric_characters(dataframe, columns):
   '''
   cleans dataframe columns of non alphanumeric or whitespace to ensure they can be entered into DB
@@ -38,7 +25,7 @@ def remove_dangerous_characters(entry):
   
   return entry
 
-def s3_to_gzip(data_type):
+def s3_to_gzip(data_type, columns):
   logger = logging.getLogger(__name__)
   local_path = os.getcwd() + f'/tmp/{data_type}/'
   #subprocess.run(f'aws s3 sync s3://udacity-dend/{data_type} {local_path}', shell=True, check=True)
@@ -50,8 +37,8 @@ def s3_to_gzip(data_type):
 
   dataframe = data_loader.create_dataframe_from_files()
 
-  if data_type == 'song_data':
-    clean_dataframe_of_non_alphanumeric_characters(dataframe, SONG_STAGING_COLUMNS)
+  clean_dataframe_of_non_alphanumeric_characters(dataframe, columns)
+
 
   logger.info(dataframe.head(100))
 

@@ -14,6 +14,40 @@ import re
 
 IAM_ROLE = 'arn:aws:iam::774141665752:role/redshift_s3_role'
 
+SONG_STAGING_COLUMNS = [
+'artist_id' ,
+'artist_latitude' ,
+'artist_location' ,
+'artist_longitude' ,
+'artist_name' ,
+'duration' ,
+'num_songs' ,
+'song_id' ,
+'title' ,
+'year'
+]
+
+LOG_STAGING_COLUMNS = [
+'artist' ,
+'auth' ,
+'firstName' ,
+'gender' ,
+'itemInSession' , 
+'lastName' ,
+'length',
+'level' ,
+'location' ,
+'method' ,
+'page' ,
+'registration',
+'sessionId' ,
+'song' ,
+'status' ,
+'ts',
+'userAgent' ,
+'userId'
+]
+
 def destroy_and_create_schema():
   logger = logging.getLogger(__name__)
   pg_hook = PostgresHook('redshift_lake')
@@ -46,13 +80,14 @@ song_staging_sync = PythonOperator(
   task_id='sync_song_staging_from_s3',
   dag=dag,
   python_callable=s3_to_gzip,
-  op_kwargs = {'data_type': 'song_data'}
+  op_kwargs = {'data_type': 'song_data', 'columns': SONG_STAGING_COLUMNS}
 )
+
 log_staging_sync = PythonOperator(
   task_id='sync_log_staging_from_s3',
   dag=dag,
   python_callable=s3_to_gzip,
-  op_kwargs = {'data_type': 'log_data'}
+  op_kwargs = {'data_type': 'log_data', 'columns': LOG_STAGING_COLUMNS}
 )
 
 sync_staging_directory_to_s3 = BashOperator(
@@ -68,13 +103,22 @@ populate_song_staging_table = PythonOperator(
   op_kwargs = {'table_name': 'song_staging', 'data': 'song_data.gz', 'IAM_ROLE': IAM_ROLE}
 )
 
+populate_log_staging_table = PythonOperator(
+  task_id='populate_log_staging_table',
+  dag=dag,
+  python_callable=s3_to_redshift,
+  op_kwargs = {'table_name': 'log_staging', 'data': 'log_data.gz', 'IAM_ROLE': IAM_ROLE}
+)
+
 create_schema = PythonOperator(
   task_id='create_schema',
   dag=dag,
   python_callable=destroy_and_create_schema
 )
 
+create_schema >> populate_log_staging_table
+create_schema >> populate_song_staging_table
 song_staging_sync >> sync_staging_directory_to_s3
 log_staging_sync >> sync_staging_directory_to_s3
 sync_staging_directory_to_s3 >> populate_song_staging_table
-create_schema >> populate_song_staging_table
+sync_staging_directory_to_s3 >> populate_log_staging_table
