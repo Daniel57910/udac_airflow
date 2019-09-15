@@ -58,3 +58,11 @@ d_timestamp_columns = [
 'weekday',
 'timestamp',
 ]
+
+d_app_user_columns = [
+  'userId',
+  'firstName',
+  'lastName',
+  'gender',
+  'level'
+]

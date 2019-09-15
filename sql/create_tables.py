@@ -57,21 +57,10 @@ artist_id TEXT REFERENCES d_artist(artist_key),
 PRIMARY KEY(song_key))
 COMPOUND SORTKEY(song_key, title);'''
 
-d_app_user_table_staging = '''CREATE TABLE IF NOT EXISTS d_app_user_staging
-(app_user_key BIGINT identity(0, 1),
-app_user_id INT,
-first_name TEXT,
-last_name TEXT,
-gender TEXT,
-level TEXT,
-timestamp BIGINT,
-PRIMARY KEY(app_user_id))
-COMPOUND SORTKEY(app_user_id, timestamp);'''
-
 d_app_user_table = '''CREATE TABLE IF NOT EXISTS
 d_app_user(
 app_user_key BIGINT identity(0, 1),
-app_user_id INT,
+app_user_id DECIMAL,
 first_name TEXT,
 last_name TEXT,
 gender TEXT,
@@ -97,7 +86,7 @@ f_songplay_table = '''CREATE TABLE IF NOT EXISTS
 f_songplay(
 songplay_key BIGINT identity(0, 1),
 start_time BIGINT,
-user_id INT REFERENCES d_app_user(app_user_id),
+user_id NUMERIC REFERENCES d_app_user(app_user_id),
 level TEXT,
 song_key INT REFERENCES d_song(song_key),
 artist_key INT REFERENCES d_artist(artist_key),
@@ -126,7 +115,6 @@ create_all_tables = [
   log_staging_table, 
   d_artist_table, 
   d_song_table, 
-  d_app_user_table_staging, 
   d_app_user_table, 
   d_timestamp_table, 
   f_songplay_table

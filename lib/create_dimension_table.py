@@ -1,7 +1,11 @@
 import pandas as pd
+import logging
 
 def create_dimension_table(table_name, staging_file, columns, index_columns, hashable_columns, disk_path):
-  
+  logger = logging.getLogger(__name__)
+
+  logger.info(locals())
+    
   dataframe = pd.read_csv(staging_file)
   dataframe = dataframe[columns]
   dataframe.drop_duplicates(index_columns, keep='last', inplace=True)

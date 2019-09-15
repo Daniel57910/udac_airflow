@@ -1,6 +1,5 @@
 import re
-string = '3514.968;; ;'
-
+string = 'Cienna,F,Freeman'
 find_string = r'([^\s\w\d.])'
 
 out = re.sub(find_string, '', string)
