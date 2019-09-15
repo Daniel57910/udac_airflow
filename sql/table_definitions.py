@@ -11,6 +11,22 @@ song_staging_columns = [
 'year'
 ]
 
+d_artist_columns = [
+'artist_id' ,
+'artist_latitude' ,
+'artist_location' ,
+'artist_longitude' ,
+'artist_name' ,
+]
+
+d_song_columns = [
+'song_id',
+'title',
+'duration',
+'year',
+'artist_id'
+]
+
 log_staging_columns = [
 'artist' ,
 'auth' ,
@@ -30,4 +46,15 @@ log_staging_columns = [
 'ts',
 'userAgent' ,
 'userId'
+]
+
+d_timestamp_columns = [
+'year',
+'month',
+'day',
+'minute',
+'second',
+'hour',
+'weekday',
+'timestamp',
 ]
