@@ -17,6 +17,7 @@ eggs/
 airflow.db
 logs/
 data/
+core_virtualenv/
 lib64/
 parts/
 sdist/

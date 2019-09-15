@@ -51,6 +51,6 @@ def s3_to_gzip(data_type, columns):
 
   dataframe.to_csv(
     f'/Users/danielwork/Documents/GitHub/udac_airflow/data/{data_type}.csv',
-    header=False,
+    header=True,
     index=False
   )
