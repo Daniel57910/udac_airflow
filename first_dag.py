@@ -56,11 +56,12 @@ dag = DAG(
   # op_kwargs = {'table_name': 'log_staging', 'data': 'log_data.gz', 'IAM_ROLE': IAM_ROLE}
 # )
 # 
-# create_schema = PythonOperator(
-  # task_id='create_schema',
-  # dag=dag,
-  # python_callable=destroy_and_create_schema
-# )
+
+create_schema = PythonOperator(
+  task_id='create_schema',
+  dag=dag,
+  python_callable=destroy_and_create_schema
+)
  
 # create_d_artist_table = PythonOperator(
   # task_id='create_d_artist_table',
@@ -127,4 +128,5 @@ populate_dimensions_table = PythonOperator(
 # create_d_artist_table >> sync_dimensions_directory_to_s3
 # create_d_song_table >> sync_dimensions_directory_to_s3
 # create_d_timestamp_table >> sync_dimensions_directory_to_s3
+create_schema
 populate_dimensions_table
