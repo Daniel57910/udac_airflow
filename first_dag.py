@@ -13,7 +13,7 @@ from datetime import datetime
 IAM_ROLE = 'arn:aws:iam::774141665752:role/redshift_s3_role'
 PROJECT_PATH = '/Users/danielwork/Documents/GitHub/udac_airflow'
 default_args = {
-  'owner': 'udacity',
+  'owner': 'daniel miller/Open Source',
   'start_date': datetime(2018, 1, 12),
   'retries': 0
 }
@@ -91,20 +91,20 @@ create_schema = PythonOperator(
     # }
 # )
 #
-create_d_app_user_table = PythonOperator(
-  task_id='create_d_app_user_table',
-  dag=dag,
-  python_callable=create_dimension_table,
-  op_kwargs = {
-    'table_name': 'd_app_user', 
-    'staging_file': PROJECT_PATH + '/data/log_data.csv', 
-    'columns': d_app_user_columns,
-    'index_columns': ['userId', 'firstName', 'lastName'],
-    'hashable_columns': ['userId', 'firstName', 'lastName'],
-    'disk_path': PROJECT_PATH + '/dimensions'
-    }
-)
-
+# create_d_app_user_table = PythonOperator(
+  # task_id='create_d_app_user_table',
+  # dag=dag,
+  # python_callable=create_dimension_table,
+  # op_kwargs = {
+    # 'table_name': 'd_app_user', 
+    # 'staging_file': PROJECT_PATH + '/data/log_data.csv', 
+    # 'columns': d_app_user_columns,
+    # 'index_columns': ['userId', 'firstName', 'lastName'],
+    # 'hashable_columns': ['userId', 'firstName', 'lastName'],
+    # 'disk_path': PROJECT_PATH + '/dimensions'
+    # }
+# )
+# 
 # create_d_timestamp_table = PythonOperator(
   # task_id='create_d_timestamp_table',
   # dag=dag,
@@ -119,18 +119,18 @@ create_d_app_user_table = PythonOperator(
 # )
 # 
 # 
-sync_dimensions_directory_to_s3 = BashOperator(
-  task_id='sync_staging_directory_to_s3',
-  bash_command=f'aws s3 sync {PROJECT_PATH}/dimensions s3://sparkify-airflow-data-2/',
-  dag=dag
- )
-# 
-populate_dimensions_table = PythonOperator(
-  task_id='populate_dimensions_table',
-  dag=dag,
-  python_callable=s3_to_redshift_parralel,
-  op_kwargs = {'tables':  ['d_artist', 'd_song', 'd_timestamp', 'd_app_user'], 'IAM_ROLE': IAM_ROLE}
-)
+# sync_dimensions_directory_to_s3 = BashOperator(
+  # task_id='sync_staging_directory_to_s3',
+  # bash_command=f'aws s3 sync {PROJECT_PATH}/dimensions s3://sparkify-airflow-data-2/',
+  # dag=dag
+#  )
+
+# populate_dimensions_table = PythonOperator(
+  # task_id='populate_dimensions_table',
+  # dag=dag,
+  # python_callable=s3_to_redshift_parralel,
+  # op_kwargs = {'tables':  ['d_artist', 'd_song', 'd_timestamp', 'd_app_user'], 'IAM_ROLE': IAM_ROLE}
+# )
 
 # create_schema >> populate_log_staging_table
 # create_schema >> populate_song_staging_table
@@ -143,6 +143,6 @@ populate_dimensions_table = PythonOperator(
 # create_d_song_table >> sync_dimensions_directory_to_s3
 # create_d_timestamp_table >> sync_dimensions_directory_to_s3
 
-create_schema >> create_d_app_user_table
-create_d_app_user_table >> sync_dimensions_directory_to_s3
-sync_dimensions_directory_to_s3 >> populate_dimensions_table
+# create_schema >> create_d_app_user_table
+# create_d_app_user_table >> sync_dimensions_directory_to_s3
+# sync_dimensions_directory_to_s3 >> populate_dimensions_table
