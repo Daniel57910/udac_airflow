@@ -1,6 +1,7 @@
 import logging
 from airflow.hooks.postgres_hook import PostgresHook
 from sql.create_tables import table_commands
+from sql.f_songplay_insert import  f_songplay_insert
 import subprocess
 from multiprocessing import Pool
 

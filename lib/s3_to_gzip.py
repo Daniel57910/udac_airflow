@@ -6,6 +6,7 @@ from lib.data_loader import DataLoader
 import pandas as pd
 import logging
 import re
+import os
 
 def clean_dataframe_of_non_alphanumeric_characters(dataframe, columns):
   '''
@@ -28,7 +29,11 @@ def remove_dangerous_characters(entry):
 def s3_to_gzip(data_type, columns):
   logger = logging.getLogger(__name__)
   local_path = os.getcwd() + f'/tmp/{data_type}/'
-  #subprocess.run(f'aws s3 sync s3://udacity-dend/{data_type} {local_path}', shell=True, check=True)
+
+  if not os.path.exists(local_path):
+    os.makedirs(local_path)
+
+  subprocess.run(f'aws s3 sync s3://udacity-dend/{data_type} {local_path}', shell=True, check=True)
 
   file_finder = FileFinder(local_path, '*.json')
   file_names = list(file_finder.return_file_names())
@@ -38,9 +43,6 @@ def s3_to_gzip(data_type, columns):
   dataframe = data_loader.create_dataframe_from_files()
 
   clean_dataframe_of_non_alphanumeric_characters(dataframe, columns)
-
-
-  logger.info(dataframe.head(100))
 
   dataframe.to_csv(
     f'/Users/danielwork/Documents/GitHub/udac_airflow/data/{data_type}.gz',

@@ -37,8 +37,3 @@ def create_d_timestamp_table(table_name, staging_file, columns, disk_path, trans
     compression='gzip'
   )
   
-  timestamp_dataframe.to_csv(
-    disk_path + f'/{table_name}.csv',
-    header=True,
-    index=False
-  )

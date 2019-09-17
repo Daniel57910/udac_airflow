@@ -18,7 +18,9 @@ airflow.db
 logs/
 data/
 core_virtualenv/
+dimensions/
 lib64/
+psql.sh
 parts/
 sdist/
 var/

@@ -66,3 +66,13 @@ d_app_user_columns = [
   'gender',
   'level'
 ]
+
+all_tables = [
+  'log_staging',
+  'song_staging',
+  'd_artist',
+  'd_song',
+  'd_app_user',
+  'd_timestamp',
+  'f_songplay'
+]
