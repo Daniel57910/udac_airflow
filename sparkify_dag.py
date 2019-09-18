@@ -34,19 +34,19 @@ song_staging_sync = PythonOperator(
   task_id='sync_song_staging_from_s3',
   dag=dag,
   python_callable=s3_to_gzip,
-  op_kwargs = {'data_type': 'song_data', 'columns': song_staging_columns}
+  op_kwargs = {'data_type': 'song_data', 'columns': song_staging_columns, 'path': PROJECT_PATH}
 )
 
 log_staging_sync = PythonOperator(
   task_id='sync_log_staging_from_s3',
   dag=dag,
   python_callable=s3_to_gzip,
-  op_kwargs = {'data_type': 'log_data', 'columns': log_staging_columns}
+  op_kwargs = {'data_type': 'log_data', 'columns': log_staging_columns, 'path': PROJECT_PATH}
 )
 
 sync_staging_directory_to_s3 = BashOperator(
   task_id='sync_staging_directory_to_s3',
-  bash_command=f'aws s3 sync {PROJECT_PATH}/data s3://sparkify-airflow-data-2/',
+  bash_command=f'aws s3 sync {PROJECT_PATH}/staging s3://sparkify-airflow-data-2/',
   dag=dag
 )
 
@@ -76,7 +76,7 @@ create_d_artist_table = PythonOperator(
   python_callable=create_dimension_table,
   op_kwargs = {
     'table_name': 'd_artist', 
-    'staging_file': PROJECT_PATH + '/data/song_data.csv', 
+    'staging_file': PROJECT_PATH + '/staging/song_data.csv', 
     'columns': d_artist_columns,
     'index_columns': ['artist_id'],
     'hashable_columns': ['artist_id', 'artist_name'],
@@ -90,7 +90,7 @@ create_d_song_table = PythonOperator(
   python_callable=create_dimension_table,
   op_kwargs = {
     'table_name': 'd_song', 
-    'staging_file': PROJECT_PATH + '/data/song_data.csv', 
+    'staging_file': PROJECT_PATH + '/staging/song_data.csv', 
     'columns': d_song_columns,
     'index_columns': ['song_id', 'title', 'artist_id'],
     'hashable_columns': ['song_id', 'artist_id'],
@@ -103,7 +103,7 @@ create_d_app_user_table = PythonOperator(
   python_callable=create_dimension_table,
   op_kwargs = {
     'table_name': 'd_app_user', 
-    'staging_file': PROJECT_PATH + '/data/log_data.csv', 
+    'staging_file': PROJECT_PATH + '/staging/log_data.csv', 
     'columns': d_app_user_columns,
     'index_columns': ['userId', 'firstName', 'lastName'],
     'hashable_columns': ['userId', 'firstName', 'lastName'],
@@ -117,7 +117,7 @@ create_d_timestamp_table = PythonOperator(
   python_callable=create_d_timestamp_table,
   op_kwargs = {
     'table_name': 'd_timestamp', 
-    'staging_file': PROJECT_PATH + '/data/log_data.csv', 
+    'staging_file': PROJECT_PATH + '/staging/log_data.csv', 
     'columns': ['ts'],
     'transform_columns': d_timestamp_columns,
     'disk_path': PROJECT_PATH + '/dimensions'
